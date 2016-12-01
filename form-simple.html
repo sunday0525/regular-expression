@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Document</title>
+<style type="text/css">
+	.wrong {
+		border: 2px solid red;
+	}
+	.right {
+		border: 2px solid green;
+	}
+</style>
+</head>
+<body>
+	<form action="http://www.miaov.com" method="post" id="form1">
+		<label for="qq">用户QQ：</label><input type="text" id="qq" />
+		<label for="email">用户邮箱：</label><input type="text" id="email" />
+		<label for="birthday">生日：</label><input type="text" id="birthday" />
+		<input type="submit" value="提交" id="sub"/>
+	</form>
+</body>
+</html>
+<script type="text/javascript">
+	var form1 = document.getElementById('form1');
+	var inputs = Array.from(form1.querySelectorAll('input[type="text"'));
+	
+	var reqq = /^[^0]\d{4,9}$/g;
+	var reemail = /^[a-zA-Z]\w{5,17}@[1-9a-z]+(.com|.cn|.com.cn)$/g;
+	
+	var today = new Date();  //当前时间
+	var dayago = new Date(today.getFullYear()-100 + '-' + (today.getMonth()+1) + '-' + today.getDate());  //获取100年前的年月日
+	var s = dayago.getTime();  //今天与100年前的时间戳（毫秒）
+	//console.log(s);
+	
+	
+	inputs[0].onblur = function () {
+	    if(!this.value || !reqq.test(this.value)){
+	  		this.className = 'wrong';
+	    }else{
+	  		this.className = 'right';
+	    }
+	};
+	inputs[1].onblur = function () { //第一个必须字母，6-18位
+	    if(!this.value || !reemail.test(this.value)){
+	  		this.className = 'wrong';
+	    }else{
+	  		this.className = 'right';
+	    }
+	};
+	inputs[2].onblur = function () { //生日 1999：01：01
+		if(!this.value){
+			this.className = 'wrong';
+			return;
+		}
+		var val = this.value.replace(/(\d+)\D(\d+)\D(\d+)/g,function($0,$1,$2,$3) {
+		    return  toOdd($1) +'-' + toOdd($2) +'-' + toOdd($3);
+		});  //把输入的日期格式转为年：月：日 且年月日都是两位数
+		var val2 = toString (this.value);  //把输入的日期格式转化为 标准的年：月：日
+		for (var i = 0; i < val.length; i++) {  //判断日期格式是否存在，如2月31号不正确
+			if(val[i] != val2[i]){
+				alert('确定有这一天吗');
+				this.className = 'wrong';
+		    	return;
+			}
+		}
+		var chazhi = new Date(val).getTime() - s
+		if( new Date(val).getTime() <= s ){  //alert('百岁了呀，恭喜')
+			this.className = 'wrong';
+		}
+		else if(new Date(val2).getTime() + 3600*24*1000 > new Date().getTime()){//alert('太小了')			
+			this.className = 'wrong';
+			//flag = false;
+		}
+		else{
+			this.className = 'right';
+		}
+	};
+	
+	form1.onsubmit = function () {
+		var flag = true;
+		for (var i = 0; i < inputs.length; i++) {
+		   if(!inputs[i].value || inputs[i].className == 'wrong' ){
+		   	inputs[i].className == 'wrong';
+		   	flag = false;
+		   }
+		}
+	    return flag;
+	}
+	
+	
+	function toString (str) { //转为 年：月：日
+		var val = str.replace(/(\d+)\D(\d+)\D(\d+)/g,function($0,$1,$2,$3) {
+		    return  $1 +'-' + $2 +'-' + $3;
+		}); 
+	    var time = new Date(val);
+	    var month = time.getMonth()+1;
+	    return time.getFullYear() + '-' + toOdd(month) + '-' + toOdd(time.getDate());
+	}
+	
+	function toOdd (n) {
+		if(n.toString().length == 1){
+			return '0' + n;
+		}else {
+			return '' + n;
+		}
+	}
+</script>
